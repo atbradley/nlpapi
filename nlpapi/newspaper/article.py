@@ -7,7 +7,6 @@ import falcon
 import newspaper
 import nltk
 from nltk.corpus import stopwords
-import pandas as pd
 
 
 class ArticleResource(object):
@@ -42,8 +41,6 @@ class ArticleResource(object):
         
         a = newspaper.Article(doc)
         self.enrich_article(a)
-        
-        posfdf = pd.DataFrame(a.pos_freqs.items(), columns=['pos', 'frequency'])
         
         outp = {
             'url':              doc,
