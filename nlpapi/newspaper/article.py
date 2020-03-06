@@ -8,7 +8,6 @@ import newspaper
 import nltk
 from nltk.corpus import stopwords
 
-
 class ArticleResource(object):
     def __init__(self):
         self.stopwords = stopwords.words(os.getenv("STOPWORD_LANGUAGE"))
@@ -30,20 +29,15 @@ class ArticleResource(object):
         
         article.word_freqs_nosw = [word for word in article.word_freqs.items()\
                          if word[0] not in self.stopwords and not re.match('\W', word[0])]
-                         
-    def on_get(self, req, resp):
+    
+    def article_response(self, url):
         outp = {}
-        doc = req.params.get('a', False)
         
-        if not doc:
-            #TODO: Send an error message.
-            return 
-        
-        a = newspaper.Article(doc)
+        a = newspaper.Article(url)
         self.enrich_article(a)
         
         outp = {
-            'url':              doc,
+            'url':              url,
             'title':            a.title,
             'text':             a.text,
             'tokens':           a.tokens,
@@ -56,5 +50,15 @@ class ArticleResource(object):
             outp['summary'] = a.summary
             outp['keywords'] = a.keywords
         
+        return outp
+        
+    def on_get(self, req, resp):
+        doc = req.params.get('a', False)
+        
+        if not doc:
+            #TODO: Send an error message.
+            return 
+        
+        outp = self.article_response(doc)
         # Create a JSON representation of the resource
         resp.body = json.dumps(outp, ensure_ascii=False)
